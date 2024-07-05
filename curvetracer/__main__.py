@@ -215,7 +215,7 @@ def command_plot_tc(f, output_file, with_temp):
     ax.set_ylabel('Temperature (C)')
     ax.set_ylim(20, tmax)
     ax.set_title('%s Transfer Characteristic' % dname)
-    ax.legend()
+    ax2.legend()
     if output_file is None:
         plt.show()
     else:
