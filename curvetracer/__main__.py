@@ -144,14 +144,17 @@ def command_plot_oc(f, output_file):
     xmax = 0
     ymin = 0
     ymax = 0
-    for vgs in sorted(dataset.keys()):
+    colors = [
+        'b', 'c', 'g', 'm', 'r', 'y'
+    ]
+    for i, vgs in enumerate(sorted(dataset.keys())):
         X = dataset[vgs][0]
         Y = dataset[vgs][1]
         xmin = min(xmin, min(X))
         xmax = max(xmax, max(X))
         ymin = min(ymin, min(Y))
         ymax = max(ymax, max(Y))
-        ax.plot(X, Y, label='Vgs=%gV' % vgs)
+        ax.plot(X, Y, label='Vgs=%gV' % vgs, color=colors[i % len(colors)])
 
     ax.set_xlabel('Vds (V)')
     ax.set_xlim(xmin, xmax)
@@ -205,8 +208,8 @@ def command_plot_tc(f, output_file, with_temp):
         ymin = min(ymin, min(Y))
         ymax = max(ymax, max(Y))
         if with_temp:
-            ax.plot(X, T, color=colors[i], linestyle='dotted')
-        ax2.plot(X, Y, label='Vds=%gV' % vds, color=colors[i])
+            ax.plot(X, T, color=colors[i % len(colors)], linestyle='dotted')
+        ax2.plot(X, Y, label='Vds=%gV' % vds, color=colors[i % len(colors)])
 
     ax2.set_ylabel('Id (mA)')
     ax2.set_ylim(ymin, ymax)
