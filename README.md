@@ -77,7 +77,7 @@ The files already contain the device name and the type of data.
 
 If `-o <output_file>` option is given, the plot is saved to output file rather than displaying it.
 
-If `-t` option is given, the temperature measurements are also shown on the transfer characteristic plot.
+If `-t` option is given, the temperature measurements are also shown on the transfer characteristic plot in the same color with a dotted line.
 
 # example: InterFET J212
 
