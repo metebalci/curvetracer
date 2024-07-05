@@ -9,7 +9,7 @@ import sys
 import time
 from typing import List, Type, Tuple
 
-from .common import DAQChannel, PSChannel, VChannel, IChannel, TChannel
+from .common import PSChannel, VChannel, IChannel, TChannel
 
 def median(f):
     v = []
@@ -43,56 +43,29 @@ def run_oc(output_file,
         ps_vgs.state = True
         ps_vds.state = True
 
-    @contextmanager
-    def relay_control(ch, delay_after_ps_on):
-        if isinstance(ch, DAQChannel):
-            # de-energize before relay operation
-            if not isinstance(ch, TChannel):
-                ps_off()
-            ch.close()
-            if not isinstance(ch, TChannel):
-                ps_on()
-            # stabilize
-            time.sleep(delay_after_ps_on)
-            yield ch
-            if not isinstance(ch, TChannel):
-                ps_off()
-        else:
-            yield ch
-
     ps_off()
     ps_vds.current = max_id
     ps_vgs.current = max_ig
     try:
         for vgs in vgs_range:
             ps_vgs.voltage = vgs
-            ps_off()
-            with relay_control(dmm_t, delay_after_ps_on) as ch:
-                while True:
-                    t_value = median(lambda: ch.temperature)
-                    if t_value < tcon:
-                        break
-                    else:
-                        print('%fC' % t_value, file=sys.stderr)
-                        time.sleep(2)
+            while True:
+                t_value = median(lambda: dmm_t.temperature)
+                if t_value < tcon:
+                    break
+                else:
+                    print('%fC' % t_value, file=sys.stderr)
+                    time.sleep(2)
 
             vds = vds_start
             while vds <= vds_stop:
                 ps_vds.voltage = vds
 
-                with relay_control(dmm_id, delay_after_ps_on) as ch:
-                    id_value = median(lambda: ch.current)
-
-                with relay_control(dmm_vds, delay_after_ps_on) as ch:
-                    vds_value = median(lambda: ch.voltage)
-
-                with relay_control(dmm_vgs, delay_after_ps_on) as ch:
-                    vgs_value = median(lambda: ch.voltage)
-
-                with relay_control(dmm_t, delay_after_ps_on) as ch:
-                    t_value = median(lambda: ch.temperature)
-
-                # turn off to give some time to cool down
+                ps_on()
+                id_value = median(lambda: dmm_id.current)
+                vds_value = median(lambda: dmm_vds.voltage)
+                vgs_value = median(lambda: dmm_vgs.voltage)
+                t_value = median(lambda: dmm_t.temperature)
                 ps_off()
 
                 print('%g %g %g %g %g %g' % (-vgs,
@@ -126,7 +99,6 @@ def run_oc(output_file,
 
                 if t_value > tmax:
                     print('powering off to cool down...', file=sys.stderr)
-                    ps_off()
                     while t_value > tcon:
                         t_value = dmm_t.temperature
                         print('%fC' % t_value, file=sys.stderr)
@@ -165,23 +137,7 @@ def run_tc(output_file,
     def ps_on():
         ps_vgs.state = True
         ps_vds.state = True
-
-    @contextmanager
-    def relay_control(ch, delay_after_ps_on):
-        if isinstance(ch, DAQChannel):
-            # de-energize before relay operation
-            if not isinstance(ch, TChannel):
-                ps_off()
-            ch.close()
-            if not isinstance(ch, TChannel):
-                ps_on()
-            # stabilize
-            time.sleep(delay_after_ps_on)
-            yield ch
-            if not isinstance(ch, TChannel):
-                ps_off()
-        else:
-            yield ch
+        time.sleep(delay_after_ps_on)
 
     ps_off()
     ps_vds.current = max_id
@@ -189,34 +145,23 @@ def run_tc(output_file,
     try:
         for vds in vds_range:
             ps_vds.voltage = vds
-            ps_off()
-            with relay_control(dmm_t, delay_after_ps_on) as ch:
-                while True:
-                    t_value = median(lambda: ch.temperature)
-                    if t_value < tcon:
-                        break
-                    else:
-                        print('%fC' % t_value, file=sys.stderr)
-                        time.sleep(2)
+            while True:
+                t_value = median(lambda: dmm_t.temperature)
+                if t_value < tcon:
+                    break
+                else:
+                    print('%fC' % t_value, file=sys.stderr)
+                    time.sleep(2)
 
             vgs = vgs_start
             while vgs >= vgs_stop:
                 ps_vgs.voltage = vgs
 
-                with relay_control(dmm_id, delay_after_ps_on) as ch:
-                    id_value = median(lambda: ch.current)
-
-                with relay_control(dmm_vds, delay_after_ps_on) as ch:
-                    vds_value = median(lambda: ch.voltage)
-
-                with relay_control(dmm_vgs, delay_after_ps_on) as ch:
-                    vgs_value = median(lambda: ch.voltage)
-
-                if dmm_t is not None:
-                    with relay_control(dmm_t, delay_after_ps_on) as ch:
-                        t_value = median(lambda: ch.temperature)
-
-                # turn off to give some time to cool down
+                ps_on()
+                id_value = median(lambda: dmm_id.current)
+                vds_value = median(lambda: dmm_vds.voltage)
+                vgs_value = median(lambda: dmm_vgs.voltage)
+                t_value = median(lambda: dmm_t.temperature)
                 ps_off()
 
                 print('%g %g %g %g %g %g' % (vds,
@@ -248,14 +193,12 @@ def run_tc(output_file,
                                              t_value),
                       file=output_file)
 
-                if dmm_t is not None:
-                    if t_value > tmax:
-                        print('powering off to cool down...', file=sys.stderr)
-                        ps_off()
-                        while t_value > tcon:
-                            t_value = dmm_t.temperature
-                            print('%fC' % t_value, file=sys.stderr)
-                            time.sleep(2)
+                if t_value > tmax:
+                    print('powering off to cool down...', file=sys.stderr)
+                    while t_value > tcon:
+                        t_value = median(dmm_t.temperature)
+                        print('%fC' % t_value, file=sys.stderr)
+                        time.sleep(2)
 
                 if vgs > vgs_fine_stop:
                     vgs = vgs - vgs_fine_step

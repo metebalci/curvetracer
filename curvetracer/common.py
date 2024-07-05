@@ -35,13 +35,6 @@ class PSChannel:
     def state(self, v:bool)->None:
         pass
 
-class DAQChannel:
-    def open(self)->None:
-        pass
-
-    def close(self)->None:
-        pass
-
 class VChannel:
     @property
     def voltage(self)->float:

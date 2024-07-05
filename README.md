@@ -8,7 +8,9 @@ Depending on the characteristic requested, Vgs and/or Vds supply is programmed a
 
 The temperature of JFET is monitored using a thermocouple and the upper bound is limited to a configurable value (tmax). Additionally, the temperature of JFET is waited to go below a configurable value (tcon) before the trace of a curve is started. This is to eliminate the difference among traces due to thermal drift. However, some curves are by nature increase the temperature of device more than others, this is not controlled (other than tmax check).
 
-Each measurement is made 3 times and the median is selected. This is to eliminate outliers that can happen due to stabilization need. To maximize the lifetime of relays in the DAQ, the power is set to off between measurements.
+Each measurement is made 3 times and the median is selected. This is to eliminate outliers that can happen if power is not stabilized yet.
+
+Because the switching is low voltage and low current, it has a low impact on the relay lifetime in DAQ module.
 
 ## extending hardware support
 
@@ -55,6 +57,14 @@ python -m curvetracer -c <config_file> oc
 
 On a successful run, this creates <device_name_in_config>.oc file containing the data.
 
+While running, it prints the programmed and measured data in this format:
+
+```
+Vgs Vds Id_measured Vds_measured Vgs_measured T_measured
+```
+
+If T > tmax, it starts printing temperature until it returns back to tcon.
+
 ## transfer characteristic (Id vs. Vgs)
 
 Similar to output characteristic:
@@ -64,6 +74,14 @@ python -m curvetracer -c <config_file> oc
 ```
 
 On a successful run, this creates <device_name_in_config>.tc file containing the data.
+
+While running, it prints the programmed and measured data in this format:
+
+```
+Vds Vgs Id_measured Vds_measured Vgs_measured T_measured
+```
+
+If T > tmax, it starts printing temperature until it returns back to tcon.
 
 ## plot
 

@@ -8,18 +8,9 @@ import vxi11
 
 from .common import WrongInstrumentException
 from .common import VChannel, IChannel, TChannel
-from .common import DAQChannel, ScpiCommonCommands
+from .common import ScpiCommonCommands
 
-class DAQ6510Channel(DAQChannel):
-    def open(self)->None:
-        self.instrument.write('ROUTE:CHANNEL:OPEN (@%d)' % self.chno)
-        self.device.wai()
-
-    def close(self)->None:
-        self.instrument.write('ROUTE:CHANNEL:CLOSE (@%d)' % self.chno)
-        self.device.wai()
-
-class DAQ6510VChannel(VChannel, DAQ6510Channel):
+class DAQ6510VChannel(VChannel):
     def __init__(self, device, chno:int)->None:
         self.device = device
         self.instrument = device.instrument
@@ -37,9 +28,11 @@ class DAQ6510VChannel(VChannel, DAQ6510Channel):
 
     @property
     def voltage(self)->float:
+        self.instrument.write('ROUTE:CHANNEL:CLOSE (@%d)' % self.chno)
+        self.device.wai()
         return float(self.instrument.ask('MEASURE:VOLTAGE:DC?'))
 
-class DAQ6510IChannel(IChannel, DAQ6510Channel):
+class DAQ6510IChannel(IChannel):
     def __init__(self, device, chno:int)->None:
         self.device = device
         self.instrument = device.instrument
@@ -57,9 +50,11 @@ class DAQ6510IChannel(IChannel, DAQ6510Channel):
 
     @property
     def current(self)->float:
+        self.instrument.write('ROUTE:CHANNEL:CLOSE (@%d)' % self.chno)
+        self.device.wai()
         return float(self.instrument.ask('MEASURE:CURRENT:DC?'))
 
-class DAQ6510TChannel(TChannel, DAQ6510Channel):
+class DAQ6510TChannel(TChannel):
     def __init__(self, device, chno:int, sensor_type:str)->None:
         self.device = device
         self.instrument = device.instrument
@@ -92,6 +87,8 @@ class DAQ6510TChannel(TChannel, DAQ6510Channel):
 
     @property
     def temperature(self)->float:
+        self.instrument.write('ROUTE:CHANNEL:CLOSE (@%d)' % self.chno)
+        self.device.wai()
         return float(self.instrument.ask('MEASURE:TEMPERATURE?'))
 
 class DAQ6510(ScpiCommonCommands):

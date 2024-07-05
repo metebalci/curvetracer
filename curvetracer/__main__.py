@@ -7,7 +7,7 @@ import configparser
 import sys
 from typing import List, Type, Tuple
 
-from .common import DAQChannel, PSChannel, VChannel, IChannel, TChannel
+from .common import PSChannel, VChannel, IChannel, TChannel
 from .common import ConfigException
 from .curvetracer import run_oc, run_tc
 from .daq6510 import DAQ6510
