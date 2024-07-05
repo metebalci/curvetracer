@@ -93,6 +93,8 @@ python -m curvetracer -i <oc_or_tc_file_name> plot
 
 The files already contain the device name and the type of data. 
 
+The curves use 6 high contrast colors (blue, cyan, green, magenta, red, yellow).
+
 If `-o <output_file>` option is given, the plot is saved to output file rather than displaying it.
 
 If `-t` option is given, the temperature measurements are also shown on the transfer characteristic plot in the same color with a dotted line.
