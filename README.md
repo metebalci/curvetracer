@@ -12,7 +12,7 @@ Each measurement is made 3 times and the median is selected. This is to eliminat
 
 ## extending hardware support
 
-Only Rohde & Schwarz NGE103B and Keithley DAQ6510 with a 7700 Card are supported. Because these are the units I use and it is impossible for me to verify other hardware, I do not plan to add support for anything I do not have and/or use. However, adding support is not difficult. The program consists of the following modules:
+Only [Rohde & Schwarz NGE103B](https://www.rohde-schwarz.com/ch-en/products/test-and-measurement/dc-power-supplies/rs-nge100b-power-supply-series_63493-576967.html) and [Keithley DAQ6510](https://www.tek.com/en/products/keithley/digital-multimeter/keithley-daq6510) with a [7700 Module](https://download.tek.com/datasheet/7700_DAQ_Card_Datasheet.pdf) are supported. Because these are the units I use and it is impossible for me to verify other hardware, I do not plan to add support for anything I do not have and/or use. However, adding support is not difficult. The program consists of the following modules:
 
 - `common.py` and `curvetracer.py` are the core program files that are independent of hardware support.
 - `nge103b.py` and `daq6510.py` are the hardware implementations. You have to create and implement similar files for different hardware.
